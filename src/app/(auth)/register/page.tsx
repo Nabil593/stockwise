@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Boxes } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,9 +17,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
@@ -43,18 +42,14 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const { error: signUpError } =
-        await authClient.signUp.email({
-          name: trimmedName,
-          email: trimmedEmail,
-          password,
-        });
+      const { error: signUpError } = await authClient.signUp.email({
+        name: trimmedName,
+        email: trimmedEmail,
+        password,
+      });
 
       if (signUpError) {
-        setError(
-          signUpError.message ||
-            "Unable to create your account."
-        );
+        setError(signUpError.message || "Unable to create your account.");
         return;
       }
 
@@ -73,17 +68,15 @@ export default function RegisterPage() {
         {/* Brand */}
         <Link
           href="/"
-          className="mb-8 flex items-center justify-center gap-3"
+          className="flex shrink-0 items-center gap-2.5"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 text-2xl font-bold text-white shadow-lg shadow-emerald-600/20">
-            S
-          </div>
+          <span className="flex h-10 w-10 items-center justify-center text-emerald-600">
+            <Boxes size={35} />
+          </span>
 
-          <span className="text-2xl font-bold tracking-tight text-slate-900">
-            Smart
-            <span className="text-emerald-600">
-              Inventory
-            </span>
+          <span className="text-xl font-bold tracking-tight text-slate-900">
+            Stock
+            <span className="text-emerald-600">Wise</span>
           </span>
         </Link>
 
@@ -172,13 +165,9 @@ export default function RegisterPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword((prev) => !prev)
-                  }
+                  onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 hover:text-emerald-600"
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -225,9 +214,7 @@ export default function RegisterPage() {
               disabled={isLoading}
               className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading
-                ? "Creating account..."
-                : "Create account"}
+              {isLoading ? "Creating account..." : "Create account"}
             </button>
           </form>
 
@@ -235,9 +222,7 @@ export default function RegisterPage() {
           <div className="my-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-slate-200" />
 
-            <span className="text-xs text-slate-400">
-              SECURE REGISTRATION
-            </span>
+            <span className="text-xs text-slate-400">SECURE REGISTRATION</span>
 
             <div className="h-px flex-1 bg-slate-200" />
           </div>
@@ -257,8 +242,7 @@ export default function RegisterPage() {
         {/* Footer */}
         <p className="mt-6 text-center text-xs leading-5 text-slate-400">
           By creating an account, you agree to use Smart Inventory responsibly.
-          <br />
-          © 2026 Smart Inventory. All rights reserved.
+          <br />© 2026 Smart Inventory. All rights reserved.
         </p>
       </div>
     </main>

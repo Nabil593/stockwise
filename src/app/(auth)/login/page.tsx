@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Boxes } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,34 +15,50 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
+  const handleDemoLogin = async () => {
     setError("");
     setIsLoading(true);
 
     try {
-      const { error: loginError } =
-        await authClient.signIn.email({
-          email,
-          password,
-        });
+      const { error: loginError } = await authClient.signIn.email({
+        email: "demo@gmail.com",
+        password: "demo1234",
+      });
 
       if (loginError) {
-        setError(
-          loginError.message ||
-            "Invalid email or password."
-        );
+        setError(loginError.message || "Demo login failed.");
         return;
       }
 
       router.replace("/dashboard");
       router.refresh();
     } catch {
-      setError(
-        "Something went wrong. Please try again."
-      );
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const { error: loginError } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (loginError) {
+        setError(loginError.message || "Invalid email or password.");
+        return;
+      }
+
+      router.replace("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -52,36 +69,29 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Brand */}
         <Link
-          href="/login"
-          className="mb-8 flex items-center justify-center gap-3"
+          href="/"
+          className="flex shrink-0 items-center gap-2.5"
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 text-2xl font-bold text-white shadow-lg shadow-emerald-600/20">
-            S
-          </div>
+          <span className="flex h-10 w-10 items-center justify-center text-emerald-600">
+            <Boxes size={35} />
+          </span>
 
-          <span className="text-2xl font-bold tracking-tight text-slate-900">
-            Smart
-            <span className="text-emerald-600">
-              Inventory
-            </span>
+          <span className="text-xl font-bold tracking-tight text-slate-900">
+            Stock
+            <span className="text-emerald-600">Wise</span>
           </span>
         </Link>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
           <div className="mb-7 text-center">
-            <h1 className="text-2xl font-bold text-slate-900">
-              Welcome back
-            </h1>
+            <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
 
             <p className="mt-2 text-sm text-slate-500">
               Sign in to manage your products and stock.
             </p>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
               <label
@@ -96,9 +106,7 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 autoComplete="email"
                 required
@@ -128,13 +136,9 @@ export default function LoginPage() {
                 <input
                   id="password"
                   name="password"
-                  type={
-                    showPassword ? "text" : "password"
-                  }
+                  type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   required
@@ -143,15 +147,9 @@ export default function LoginPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword((prev) => !prev)
-                  }
+                  onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 hover:text-emerald-600"
-                  aria-label={
-                    showPassword
-                      ? "Hide password"
-                      : "Show password"
-                  }
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -174,17 +172,22 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading
-                ? "Signing in..."
-                : "Sign in"}
+              {isLoading ? "Signing in..." : "Sign in"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+              className="w-full rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoading ? "Please wait..." : "Try Demo Account"}
             </button>
           </form>
 
           <div className="my-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">
-              SECURE ACCESS
-            </span>
+            <span className="text-xs text-slate-400">SECURE ACCESS</span>
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
