@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
-const RegisterPage = () => {
+export default function RegisterPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -16,12 +16,17 @@ const RegisterPage = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (trimmedName.length < 2) {
+      setError("Name must be at least 2 characters long.");
       return;
     }
 
@@ -30,17 +35,26 @@ const RegisterPage = () => {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { error: signUpError } = await authClient.signUp.email({
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      });
+      const { error: signUpError } =
+        await authClient.signUp.email({
+          name: trimmedName,
+          email: trimmedEmail,
+          password,
+        });
 
       if (signUpError) {
-        setError(signUpError.message || "Unable to create your account.");
+        setError(
+          signUpError.message ||
+            "Unable to create your account."
+        );
         return;
       }
 
@@ -56,13 +70,20 @@ const RegisterPage = () => {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <Link href="/" className="mb-8 flex items-center justify-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white shadow-lg shadow-blue-600/20">
-            C
+        {/* Brand */}
+        <Link
+          href="/"
+          className="mb-8 flex items-center justify-center gap-3"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 text-2xl font-bold text-white shadow-lg shadow-emerald-600/20">
+            S
           </div>
+
           <span className="text-2xl font-bold tracking-tight text-slate-900">
-            Complain<span className="text-blue-600">Box</span>
+            Smart
+            <span className="text-emerald-600">
+              Inventory
+            </span>
           </span>
         </Link>
 
@@ -72,13 +93,14 @@ const RegisterPage = () => {
             <h1 className="text-2xl font-bold text-slate-900">
               Create your account
             </h1>
+
             <p className="mt-2 text-sm text-slate-500">
-              Get started and keep track of your complaints.
+              Start managing your products and inventory smarter.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name */}
+            {/* Full Name */}
             <div>
               <label
                 htmlFor="name"
@@ -86,6 +108,7 @@ const RegisterPage = () => {
               >
                 Full name
               </label>
+
               <input
                 id="name"
                 name="name"
@@ -97,7 +120,7 @@ const RegisterPage = () => {
                 minLength={2}
                 maxLength={100}
                 required
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
               />
             </div>
 
@@ -109,6 +132,7 @@ const RegisterPage = () => {
               >
                 Email address
               </label>
+
               <input
                 id="email"
                 name="email"
@@ -118,7 +142,7 @@ const RegisterPage = () => {
                 placeholder="you@example.com"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
               />
             </div>
 
@@ -130,6 +154,7 @@ const RegisterPage = () => {
               >
                 Password
               </label>
+
               <div className="relative">
                 <input
                   id="password"
@@ -140,14 +165,20 @@ const RegisterPage = () => {
                   placeholder="At least 8 characters"
                   autoComplete="new-password"
                   minLength={8}
+                  maxLength={128}
                   required
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 pr-16 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 pr-16 text-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
                 />
+
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 hover:text-blue-600"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() =>
+                    setShowPassword((prev) => !prev)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 hover:text-emerald-600"
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -162,6 +193,7 @@ const RegisterPage = () => {
               >
                 Confirm password
               </label>
+
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -171,8 +203,9 @@ const RegisterPage = () => {
                 placeholder="Re-enter your password"
                 autoComplete="new-password"
                 minLength={8}
+                maxLength={128}
                 required
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
               />
             </div>
 
@@ -190,37 +223,44 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading
+                ? "Creating account..."
+                : "Create account"}
             </button>
           </form>
 
+          {/* Divider */}
           <div className="my-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs text-slate-400">GET STARTED</span>
+
+            <span className="text-xs text-slate-400">
+              SECURE REGISTRATION
+            </span>
+
             <div className="h-px flex-1 bg-slate-200" />
           </div>
 
+          {/* Login Link */}
           <p className="text-center text-sm text-slate-600">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-semibold text-blue-600 transition hover:text-blue-700"
+              className="font-semibold text-emerald-600 transition hover:text-emerald-700"
             >
               Sign in
             </Link>
           </p>
         </div>
 
+        {/* Footer */}
         <p className="mt-6 text-center text-xs leading-5 text-slate-400">
-          By creating an account, you agree to use ComplainBox responsibly.
+          By creating an account, you agree to use Smart Inventory responsibly.
           <br />
-          © 2026 ComplainBox. All rights reserved.
+          © 2026 Smart Inventory. All rights reserved.
         </p>
       </div>
     </main>
   );
-};
-
-export default RegisterPage;
+}
