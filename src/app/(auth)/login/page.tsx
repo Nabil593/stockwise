@@ -67,20 +67,6 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className="w-full max-w-md">
-        {/* Brand */}
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-2.5"
-        >
-          <span className="flex h-10 w-10 items-center justify-center text-emerald-600">
-            <Boxes size={35} />
-          </span>
-
-          <span className="text-xl font-bold tracking-tight text-slate-900">
-            Stock
-            <span className="text-emerald-600">Wise</span>
-          </span>
-        </Link>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-8">
           <div className="mb-7 text-center">
