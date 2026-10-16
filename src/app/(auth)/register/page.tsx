@@ -68,7 +68,7 @@ export default function RegisterPage() {
         {/* Brand */}
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2.5"
+          className="flex justify-center items-center gap-2.5"
         >
           <span className="flex h-10 w-10 items-center justify-center text-emerald-600">
             <Boxes size={35} />
