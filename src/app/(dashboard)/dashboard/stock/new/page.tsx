@@ -37,13 +37,29 @@ interface ApiResponse {
   data?: Product[] | Product | { products?: Product[] };
 }
 
+async function readApiResponse(response: Response): Promise<ApiResponse> {
+  const body = await response.text();
+
+  try {
+    return JSON.parse(body) as ApiResponse;
+  } catch {
+    console.error("API response is not JSON:", {
+      url: response.url,
+      status: response.status,
+      body: body.slice(0, 300),
+    });
+
+    throw new Error(
+      `API returned a non-JSON response. HTTP ${response.status}. Check the browser console.`,
+    );
+  }
+}
+
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 ).replace(/\/+$/, "");
 
-const API_BASE = API_URL.endsWith("/api")
-  ? API_URL
-  : `${API_URL}/api`;
+const API_BASE = API_URL.endsWith("/api") ? API_URL : `${API_URL}/api`;
 
 const PRODUCT_URL = `${API_BASE}/products`;
 const MOVEMENT_URL = `${API_BASE}/stock/movements`;
@@ -83,7 +99,7 @@ export default function NewStockPage() {
         headers: { Accept: "application/json" },
       });
 
-      const result: ApiResponse = await response.json();
+      const result: ApiResponse = await readApiResponse(response);
 
       if (!response.ok || !result.success) {
         throw new Error(result.message || "Failed to load products.");
@@ -93,7 +109,7 @@ export default function NewStockPage() {
       const list = Array.isArray(data)
         ? data
         : data && "products" in data
-          ? data.products ?? []
+          ? (data.products ?? [])
           : [];
 
       setProducts(list);
@@ -106,15 +122,10 @@ export default function NewStockPage() {
       setForm((current) => ({
         ...current,
         productId:
-          current.productId ||
-          initialProduct?._id ||
-          list[0]?._id ||
-          "",
+          current.productId || initialProduct?._id || list[0]?._id || "",
       }));
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load products.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to load products.");
     } finally {
       setLoadingProducts(false);
     }
@@ -124,10 +135,7 @@ export default function NewStockPage() {
     void loadProducts();
   }, [loadProducts]);
 
-  function updateField(
-    field: keyof typeof initialForm,
-    value: string,
-  ) {
+  function updateField(field: keyof typeof initialForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
     setError("");
     setSuccess("");
@@ -166,10 +174,7 @@ export default function NewStockPage() {
       return;
     }
 
-    if (
-      form.type === "ADJUSTMENT" &&
-      !Number.isSafeInteger(quantity)
-    ) {
+    if (form.type === "ADJUSTMENT" && !Number.isSafeInteger(quantity)) {
       setError("The adjusted stock must be a whole number.");
       return;
     }
@@ -195,7 +200,7 @@ export default function NewStockPage() {
         body: JSON.stringify(payload),
       });
 
-      const result: ApiResponse = await response.json();
+      const result: ApiResponse = await readApiResponse(response);
 
       if (!response.ok || !result.success) {
         throw new Error(
@@ -233,7 +238,8 @@ export default function NewStockPage() {
       title: "Stock In",
       description: "Add units to inventory",
       icon: TrendingUp,
-      activeClass: "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/10",
+      activeClass:
+        "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/10",
       iconClass: "bg-emerald-100 text-emerald-700",
     },
     {
@@ -321,7 +327,10 @@ export default function NewStockPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+      >
         <div className="space-y-6 lg:col-span-2">
           {/* Movement type */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -523,30 +532,29 @@ export default function NewStockPage() {
                 >
                   <option value="">Select a reason</option>
 
-                  {(
-                    form.type === "IN"
+                  {(form.type === "IN"
+                    ? [
+                        "Purchase / Restock",
+                        "Customer Return",
+                        "Opening Stock",
+                        "Transfer In",
+                        "Other",
+                      ]
+                    : form.type === "OUT"
                       ? [
-                          "Purchase / Restock",
-                          "Customer Return",
-                          "Opening Stock",
-                          "Transfer In",
+                          "Customer Sale",
+                          "Damaged Goods",
+                          "Expired Goods",
+                          "Transfer Out",
+                          "Internal Use",
                           "Other",
                         ]
-                      : form.type === "OUT"
-                        ? [
-                            "Customer Sale",
-                            "Damaged Goods",
-                            "Expired Goods",
-                            "Transfer Out",
-                            "Internal Use",
-                            "Other",
-                          ]
-                        : [
-                            "Physical Stock Count",
-                            "Damaged / Lost Stock",
-                            "Data Correction",
-                            "Other",
-                          ]
+                      : [
+                          "Physical Stock Count",
+                          "Damaged / Lost Stock",
+                          "Data Correction",
+                          "Other",
+                        ]
                   ).map((reason) => (
                     <option key={reason} value={reason}>
                       {reason}
@@ -560,15 +568,14 @@ export default function NewStockPage() {
                   htmlFor="notes"
                   className="mb-2 block text-sm font-semibold text-slate-700"
                 >
-                  Notes <span className="font-normal text-slate-400">(optional)</span>
+                  Notes{" "}
+                  <span className="font-normal text-slate-400">(optional)</span>
                 </label>
 
                 <textarea
                   id="notes"
                   value={form.notes}
-                  onChange={(event) =>
-                    updateField("notes", event.target.value)
-                  }
+                  onChange={(event) => updateField("notes", event.target.value)}
                   maxLength={500}
                   rows={4}
                   placeholder="Add reference numbers or other useful details..."
@@ -649,8 +656,8 @@ export default function NewStockPage() {
                     className="mt-0.5 shrink-0 text-amber-700"
                   />
                   <p className="text-xs leading-5 text-amber-800">
-                    This movement may leave the product at or below its
-                    minimum stock level.
+                    This movement may leave the product at or below its minimum
+                    stock level.
                   </p>
                 </div>
               )}
@@ -659,9 +666,7 @@ export default function NewStockPage() {
               <button
                 type="submit"
                 disabled={
-                  submitting ||
-                  loadingProducts ||
-                  products.length === 0
+                  submitting || loadingProducts || products.length === 0
                 }
                 className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
